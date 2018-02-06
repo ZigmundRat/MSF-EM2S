@@ -17,7 +17,8 @@ public class MsfDecodeAlgorithmCheckerVCDFileParser extends AbstractMsfTimecodeV
 	private MsfSignalMillisecondSignalSlice[] mySlices;
 	private int[][] myDecodedSignals = new int[5][6];
 	private Map<Integer,Integer> myErrors = new Hashtable<Integer,Integer>();
-	private Map<String,Integer> myErrorSignals = new Hashtable<String,Integer>();
+	// Keys are binary code and expected signal, values are number of occurences
+	private Map<String,Map<Integer,Integer>> myErrorSignals = new Hashtable<String,Map<Integer,Integer>>();
 
 	/**
 	 * Constructor
@@ -62,39 +63,50 @@ public class MsfDecodeAlgorithmCheckerVCDFileParser extends AbstractMsfTimecodeV
 		} else if (decoded.equals("0000011111")) {
 			decodedSignal = MsfTimecodeGenerator.MIN;
 		} else {
-			Integer count = myErrorSignals.get(decoded);
 			decodedSignal = 5;
-			if (count == null) {
-				myErrorSignals.put(decoded, 1);
-			} else {
-				myErrorSignals.put(decoded, count+1);
-			}
 		}
 		myDecodedSignals[second.getSignal()][decodedSignal]++;
 		if (second.getSignal() != decodedSignal) {
 			int tenMinute = (int)(second.getSecondStart() / 600000000l);
 			Integer count = myErrors.get(tenMinute);
+			Map<Integer,Integer> signals = myErrorSignals.get(decoded);
 			if (count == null) {
 				myErrors.put(tenMinute, 1);
 			} else {
 				myErrors.put(tenMinute, count+1);
+			}
+			if (signals == null) {
+				signals = new Hashtable<Integer,Integer>();
+				signals.put(second.getSignal(), 1);
+				myErrorSignals.put(decoded, signals);
+			} else {
+				count = signals.get(second.getSignal());
+				if (count == null) count = 0;
+				signals.put(second.getSignal(), count+1);
 			}
 		}
 
 	}
 
 	protected void doWriteResults() {
-//		TreeSet<Integer> tenMinutes = new TreeSet<Integer>(myErrors.keySet());
 		TreeSet<String> signalSet = new TreeSet<String>(myErrorSignals.keySet());
 		for (int tenMin = 0 ; tenMin < 1200 ; tenMin++) {
+			Integer c = myErrors.get(tenMin);
+			if (c == null) c = 0;
 			System.out.print(tenMin);
 			System.out.print(',');
-			System.out.println(myErrors.get(tenMin));
+			System.out.println(c.toString());
 		}
 		for (String signal : signalSet) {
+			Map<Integer,Integer> count = myErrorSignals.get(signal);
 			System.out.print(signal);
-			System.out.print(',');
-			System.out.println(myErrorSignals.get(signal));
+			for (int s = 0 ; s < 5 ; s++) {
+				Integer c = count.get(s);
+				if (c == null) c = 0;
+				System.out.print(',');
+				System.out.print(c.toString());
+			}
+			System.out.println();
 		}
 		for (int i = 0 ; i < 5 ; i++) {
 			System.out.print(i);

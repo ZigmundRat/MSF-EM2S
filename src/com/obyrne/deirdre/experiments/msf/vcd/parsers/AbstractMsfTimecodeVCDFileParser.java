@@ -34,6 +34,7 @@ public abstract class AbstractMsfTimecodeVCDFileParser implements VCDFileParser 
 			myPrevSecond[i] = myThisSecond[i];
 			myThisSecond[i] = null;
 		}
+		myMsfTimecode.nextSec();
 	}
 
 	public void newMSFSignal(long us, int receiver, boolean value) {

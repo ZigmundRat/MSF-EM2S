@@ -20,8 +20,10 @@ import com.obyrne.deirdre.experiments.msf.vcd.util.MsfSignalMillisecondSignalSli
  */
 public class Main {
 	
-	private static final String INPUT_FILE = "./data1.vcd";
-	public static final String OUTPUT_DIRECTORY = "./";
+//	private static final String INPUT_FILE = "./data1.vcd";
+	private static final String INPUT_FILE = "C:\\cygwin64\\home\\User\\msf-sigrok\\20180128225755.vcd";
+//	public static final String OUTPUT_DIRECTORY = "./";
+	public static final String OUTPUT_DIRECTORY = "C:\\cygwin64\\home\\User\\msf-sigrok\\";
 
 	// The time of the first record in the input file
 	private static final int YR = 2018;
