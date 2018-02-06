@@ -5,12 +5,12 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import com.obyrne.deirdre.experiments.msf.vcd.parsers.GPSSecondIntervalsVCDFileParser;
-import com.obyrne.deirdre.experiments.msf.vcd.parsers.MsfDecodeAlgorithmChecker;
-import com.obyrne.deirdre.experiments.msf.vcd.parsers.MsfEdges;
-import com.obyrne.deirdre.experiments.msf.vcd.parsers.MsfPulseWidths;
-import com.obyrne.deirdre.experiments.msf.vcd.parsers.MsfSecondEdges;
-import com.obyrne.deirdre.experiments.msf.vcd.parsers.MsfSignalSlices;
-import com.obyrne.deirdre.experiments.msf.vcd.parsers.MsfTimecode;
+import com.obyrne.deirdre.experiments.msf.vcd.parsers.MsfDecodeAlgorithmCheckerVCDFileParser;
+import com.obyrne.deirdre.experiments.msf.vcd.parsers.MsfEdgesVCDFileParser;
+import com.obyrne.deirdre.experiments.msf.vcd.parsers.MsfPulseWidthsVCDFileParser;
+import com.obyrne.deirdre.experiments.msf.vcd.parsers.MsfSecondEdgesVCDFileParser;
+import com.obyrne.deirdre.experiments.msf.vcd.parsers.MsfSignalSlicesSignalLevelVCDFileParser;
+import com.obyrne.deirdre.experiments.msf.vcd.parsers.MsfTimecodeVCDFileParser;
 import com.obyrne.deirdre.experiments.msf.vcd.parsers.VCDFileParser;
 import com.obyrne.deirdre.experiments.msf.vcd.util.MsfTimecodeGenerator;
 import com.obyrne.deirdre.experiments.msf.vcd.util.MsfSignalMillisecondSignalSlice;
@@ -112,7 +112,7 @@ public class Main {
 //		parser = new MsfSignalSlices("msf-20ms.csv",getAll20msSlices(), new MsfSignalGenerator(CALENDAR));
 //		parser = new MsfSignalSlices("msf-100ms.csv",get100msSlices(), new MsfSignalGenerator(CALENDAR));
 //		parser = new MsfSignalSlices("msf-100ms.csv",getAll100msSlices(), new MsfSignalGenerator(CALENDAR));
-		parser = new MsfDecodeAlgorithmChecker(getAll100msSlices(), new MsfTimecodeGenerator(CALENDAR));
+		parser = new MsfDecodeAlgorithmCheckerVCDFileParser(getAll100msSlices(), new MsfTimecodeGenerator(CALENDAR));
 //		parser = new MsfDecodeAlgorithmChecker(getAll20msSlices(), new MsfSignalGenerator(CALENDAR));
 		
 		

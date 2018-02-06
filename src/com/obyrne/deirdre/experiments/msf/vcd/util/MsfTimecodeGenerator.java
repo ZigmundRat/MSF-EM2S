@@ -5,6 +5,7 @@ import java.util.GregorianCalendar;
 
 public class MsfTimecodeGenerator {
 	
+	// The 5 MSF signals
 	public static final int A0B0 = 0;
 	public static final int A0B1 = 1;
 	public static final int A1B0 = 2;
@@ -16,6 +17,10 @@ public class MsfTimecodeGenerator {
 	
 	private Calendar myCurrentTime;
 	
+	/**
+	 * MSF timecode generator constructor
+	 * @param calendar a calendar object containing the second at which the VCD file starts
+	 */
 	public MsfTimecodeGenerator(Calendar calendar) {
 		myCurrentTime = calendar;
 		myCurrentTime.add(Calendar.MINUTE, 1); // MSF broadcasts the time for the next minute
@@ -52,11 +57,17 @@ public class MsfTimecodeGenerator {
 		}
 	}
 
+	/**
+	 * Advance this generator to the next UTC second
+	 */
 	public void nextSec() {
 		myCurrentTime.add(Calendar.SECOND, 1);
 		if (myCurrentTime.get(Calendar.SECOND) == 0) recalculateTimecode();
 	}
 
+	/**
+	 * Returns which of the 5 MSF signal values that was transmitted during the current second
+	 */
 	public int getMsfTimecode() {
 		int sec = myCurrentTime.get(Calendar.SECOND);
 		if (sec == 0) return MIN;
@@ -98,6 +109,9 @@ public class MsfTimecodeGenerator {
 		PARITIES[3]=getParity(39,51);
 	}
 	
+	/**
+	 * Debug app
+	 */
 	public static void main(String[] args) throws Exception {
 		Calendar cal = GregorianCalendar.getInstance();
 		MsfTimecodeGenerator me;
