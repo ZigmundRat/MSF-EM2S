@@ -21,7 +21,9 @@ import com.obyrne.deirdre.experiments.msf.vcd.util.MsfSignalMillisecondSignalSli
 public class Main {
 	
 	private static final String INPUT_FILE = "./data1.vcd";
+//	private static final String INPUT_FILE = "C:\\cygwin64\\home\\User\\msf-sigrok\\20180128225755.vcd";
 	public static final String OUTPUT_DIRECTORY = "./";
+//	public static final String OUTPUT_DIRECTORY = "C:\\cygwin64\\home\\User\\msf-sigrok\\";
 
 	// The time of the first record in the input file
 	private static final int YR = 2018;
@@ -105,14 +107,14 @@ public class Main {
 		
 //		parser = new MsfEdges(new MsfSignalGenerator(CALENDAR));
 //		parser = new MsfTimecode(new MsfSignalGenerator(CALENDAR));
-//		parser = new MsfSecondEdges();
+		parser = new MsfSecondEdgesVCDFileParser();
 //		parser = new GPSSecondIntervals();
 //		parser = new MsfPulseWidths();
 //		parser = new MsfSignalSlices("msf-20ms.csv",get20msSlices(), new MsfSignalGenerator(CALENDAR));
 //		parser = new MsfSignalSlices("msf-20ms.csv",getAll20msSlices(), new MsfSignalGenerator(CALENDAR));
 //		parser = new MsfSignalSlices("msf-100ms.csv",get100msSlices(), new MsfSignalGenerator(CALENDAR));
 //		parser = new MsfSignalSlices("msf-100ms.csv",getAll100msSlices(), new MsfSignalGenerator(CALENDAR));
-		parser = new MsfDecodeAlgorithmCheckerVCDFileParser(getAll100msSlices(), new MsfTimecodeGenerator(CALENDAR));
+//		parser = new MsfDecodeAlgorithmCheckerVCDFileParser(getAll100msSlices(), new MsfTimecodeGenerator(CALENDAR));
 //		parser = new MsfDecodeAlgorithmChecker(getAll20msSlices(), new MsfSignalGenerator(CALENDAR));
 		
 		
