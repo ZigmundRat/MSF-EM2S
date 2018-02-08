@@ -4,6 +4,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.TreeSet;
 
+import com.obyrne.deirdre.experiments.msf.vcd.SignalSet;
 import com.obyrne.deirdre.experiments.msf.vcd.util.MsfMillisecondSignalLevelProcessor;
 import com.obyrne.deirdre.experiments.msf.vcd.util.MsfTimecodeGenerator;
 import com.obyrne.deirdre.experiments.msf.vcd.util.MsfSignalMillisecondSignalSlice;
@@ -16,7 +17,8 @@ public class MsfDecodeAlgorithmCheckerVCDFileParser extends AbstractMsfTimecodeV
 
 	private MsfSignalMillisecondSignalSlice[] mySlices;
 	private int[][] myDecodedSignals = new int[5][6];
-	private Map<Integer,Integer> myErrors = new Hashtable<Integer,Integer>();
+	// Key is 10 minute period, value map of receiver to errors
+	private Map<Integer,Map<Integer,Integer>> myErrors = new Hashtable<Integer,Map<Integer,Integer>>();
 	// Keys are binary code and expected signal, values are number of occurences
 	private Map<String,Map<Integer,Integer>> myErrorSignals = new Hashtable<String,Map<Integer,Integer>>();
 
@@ -68,12 +70,18 @@ public class MsfDecodeAlgorithmCheckerVCDFileParser extends AbstractMsfTimecodeV
 		myDecodedSignals[second.getSignal()][decodedSignal]++;
 		if (second.getSignal() != decodedSignal) {
 			int tenMinute = (int)(second.getSecondStart() / 600000000l);
-			Integer count = myErrors.get(tenMinute);
+			Map<Integer,Integer> receiverCount = myErrors.get(tenMinute);
 			Map<Integer,Integer> signals = myErrorSignals.get(decoded);
+			Integer count;
+			if (receiverCount == null) {
+				receiverCount = new Hashtable<Integer,Integer>();
+				myErrors.put(tenMinute, receiverCount);
+			}
+			count = receiverCount.get(receiver);
 			if (count == null) {
-				myErrors.put(tenMinute, 1);
+				receiverCount.put(receiver, 1);
 			} else {
-				myErrors.put(tenMinute, count+1);
+				receiverCount.put(receiver, count+1);
 			}
 			if (signals == null) {
 				signals = new Hashtable<Integer,Integer>();
@@ -91,11 +99,20 @@ public class MsfDecodeAlgorithmCheckerVCDFileParser extends AbstractMsfTimecodeV
 	protected void doWriteResults() {
 		TreeSet<String> signalSet = new TreeSet<String>(myErrorSignals.keySet());
 		for (int tenMin = 0 ; tenMin < 1200 ; tenMin++) {
-			Integer c = myErrors.get(tenMin);
-			if (c == null) c = 0;
+			Map<Integer,Integer> receiverCount = myErrors.get(tenMin);
 			System.out.print(tenMin);
-			System.out.print(',');
-			System.out.println(c.toString());
+			for (int receiver = 0 ; receiver < SignalSet.NUM_MSF_RECEIVERS ; receiver++) {
+				Integer c;
+				if (receiverCount == null) {
+					c = 0;
+				} else {
+					c = receiverCount.get(receiver);
+					if (c == null) c = 0;
+				}
+				System.out.print(',');
+				System.out.print(c.toString());
+			}
+			System.out.println();
 		}
 		for (String signal : signalSet) {
 			Map<Integer,Integer> count = myErrorSignals.get(signal);

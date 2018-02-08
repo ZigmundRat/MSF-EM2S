@@ -12,6 +12,7 @@ import java.util.TreeSet;
 
 import com.obyrne.deirdre.experiments.msf.vcd.Main;
 import com.obyrne.deirdre.experiments.msf.vcd.SignalSet;
+import com.obyrne.deirdre.experiments.msf.vcd.util.Averager;
 
 /**
  * A VCD file parser which generates a histogram of where in the UTC second the MSF second edge occurs.
@@ -25,6 +26,8 @@ public class MsfSecondEdgesVCDFileParser implements VCDFileParser {
 	private long mySecondStart = 0L;
 	// Key - edge location (microseconds), value - number of occurrences for each receiver
 	private Hashtable<Integer,Integer[]> myAns = new Hashtable<Integer,Integer[]>();
+	// Key - 10 minute time slice, value - averager for each receiver
+	private Hashtable<Integer,Averager[]> myTimedData = new Hashtable<Integer,Averager[]>();
 	private boolean[] myMsfSecondEdgeFound = new boolean[SignalSet.NUM_MSF_RECEIVERS];
 	private long[] myPreviousMsfSecond = new long[SignalSet.NUM_MSF_RECEIVERS];
 	// Key - Length of second, value - map whose key is receiver number and whose value is a list of second offsets
@@ -36,7 +39,7 @@ public class MsfSecondEdgesVCDFileParser implements VCDFileParser {
 		myWriter = new FileWriter(new File(OUTPUT_FILE), false);
 		myWriter.write("\"Microseconds since GPS second\"");
 		for (int i = 0 ; i < SignalSet.NUM_MSF_RECEIVERS ; i++) {
-			myWriter.write(",\"Receiver ");;
+			myWriter.write(",\"Receiver ");
 			myWriter.write(Integer.toString(i+1));
 			myWriter.write('"');
 		}
@@ -97,13 +100,29 @@ public class MsfSecondEdgesVCDFileParser implements VCDFileParser {
 		}
 	}
 
+	private void addToTimedData(long us, int receiver, int duration) {
+		int tenMin = (int)(us / 600000000L);
+		Averager[] averagers = myTimedData.get(tenMin);
+		if (averagers == null) {
+			averagers = new Averager[SignalSet.NUM_MSF_RECEIVERS];
+			for (int i = 0 ; i < SignalSet.NUM_MSF_RECEIVERS ; i++) {
+				averagers[i] = new Averager();
+			}
+			myTimedData.put(tenMin, averagers);
+		}
+		averagers[receiver].add(duration);
+	}
+	
 	public void newMSFSignal(long us, int receiver, boolean value) {
 		int duration;
 		if (myMsfSecondEdgeFound[receiver]) return;
 		if (value) return;
 		myMsfSecondEdgeFound[receiver] = true;
 		duration = (int)(us - mySecondStart);
-		if (duration < 40000) addToAns(receiver,duration);
+		if (duration < 40000) {
+			addToAns(receiver,duration);
+			addToTimedData(us, receiver, duration);
+		}
 		if (myPreviousMsfSecond[receiver] != 0) {
 			int secondLength = (int)(us - myPreviousMsfSecond[receiver]);
 			if ((secondLength < 1020000) && (secondLength >= 980000)) {
@@ -126,6 +145,26 @@ public class MsfSecondEdgesVCDFileParser implements VCDFileParser {
 			for (int i = 0 ; i < SignalSet.NUM_MSF_RECEIVERS ; i++) {
 				myWriter.write(',');
 				myWriter.write(Integer.toString(vals[i]));
+			}
+			myWriter.write('\n');
+		}
+		myWriter.write("\n\"10 Min\"");
+		for (int i = 0 ; i < SignalSet.NUM_MSF_RECEIVERS ; i++) {
+			myWriter.write(",\"Receiver ");
+			myWriter.write(Integer.toString(i+1));
+			myWriter.write('"');
+		}
+		myWriter.write('\n');
+		for (int t = 0 ; t < 1200 ; t++) {
+			Averager[] averagers = myTimedData.get(t);
+			myWriter.write(Integer.toString(t));
+			for (int r = 0 ; r < SignalSet.NUM_MSF_RECEIVERS ; r++) {
+				myWriter.write(',');
+				if (averagers == null) {
+					myWriter.write('0');
+				} else {
+					myWriter.write(String.format("%5.2f", averagers[r].getAverage()/1000.0));
+				}
 			}
 			myWriter.write('\n');
 		}
